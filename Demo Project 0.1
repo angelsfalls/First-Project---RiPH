@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Museo ng Bulacan</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --gold:#C9963A; --gold-light:#E8C46D; --gold-dim:#7A5A18;
+  --cream:#F5EDD8; --parchment:#EDE0C4; --ivory:#FAF5E9;
+  --dark:#100A02; --brown:#1E1005; --brown-mid:#2E1A08;
+}
+html,body { width:100%; height:100%; overflow:hidden; background:var(--dark); font-family:'Cormorant Garamond',serif; color:var(--cream); cursor:none; }
+
+/* Custom cursor — sleek minimal crosshair/arrow */
+#cur {
+  position:fixed;pointer-events:none;z-index:9999;
+  width:24px;height:24px;
+  transform:translate(-2px,-2px);
+  transition:opacity .15s ease;
+}
+#cur svg { width:24px;height:24px;overflow:visible;transition:transform .15s ease; }
+#cur.h svg { transform:scale(1.3); }
+
+
+/* ══ SCREEN 1 — ENTRANCE ══ */
+#screen-entrance {
+  position:fixed;inset:0;z-index:100;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:
+    radial-gradient(ellipse at 50% 30%,rgba(201,150,58,.08) 0%,transparent 60%),
+    repeating-linear-gradient(0deg,transparent,transparent 59px,rgba(201,150,58,.03) 60px),
+    repeating-linear-gradient(90deg,transparent,transparent 59px,rgba(201,150,58,.03) 60px),
+    var(--dark);
+  transition:opacity 1.2s ease,visibility 1.2s ease;
+}
+#screen-entrance.gone { opacity:0;visibility:hidden; }
+
+.dust { position:absolute;inset:0;overflow:hidden;pointer-events:none; }
+.dust span { position:absolute;width:2px;height:2px;border-radius:50%;background:var(--gold);animation:drift linear infinite;opacity:0; }
+@keyframes drift { 0%{transform:translateY(100vh) translateX(0);opacity:0} 10%{opacity:.5} 90%{opacity:.3} 100%{transform:translateY(-10vh) translateX(var(--dx));opacity:0} }
+
+.entrance-hero { text-align:center;position:relative;z-index:2;animation:heroIn 1.2s cubic-bezier(.22,1,.36,1) both; }
+@keyframes heroIn { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+.e-eyebrow { font-size:10px;letter-spacing:8px;color:var(--gold);text-transform:uppercase;margin-bottom:18px; }
+.e-title { font-family:'Playfair Display',serif;font-size:clamp(48px,8vw,108px);font-weight:900;line-height:.9;color:var(--ivory); }
+.e-title em { display:block;font-style:italic;color:var(--gold); }
+.e-sub { font-family:'IM Fell English',serif;font-style:italic;font-size:20px;color:var(--parchment);opacity:.8;margin:16px 0 28px; }
+.e-divider { width:100px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:0 auto 28px; }
+
+/* DOOR */
+.door-wrap { position:relative;width:180px;height:280px;margin:0 auto 28px;perspective:900px; }
+.door-frame {
+  position:absolute;inset:-14px;
+  border:3px solid var(--gold-dim);
+  box-shadow:inset 0 0 30px rgba(0,0,0,.8),0 0 40px rgba(201,150,58,.08);
+}
+.door-frame::before { content:none; }
+.door-left,.door-right {
+  position:absolute;top:0;width:50%;height:100%;
+  background:linear-gradient(135deg,#1A0C04 0%,#2E1A08 45%,#1A0C04 100%);
+  transform-style:preserve-3d;backface-visibility:hidden;
+  border:1px solid var(--gold-dim);overflow:hidden;
+  transition:transform 1.5s cubic-bezier(.77,0,.18,1);
+}
+.door-right { left:50%;transform-origin:right center; }
+.door-left { transform-origin:left center; }
+.door-panel {
+  position:absolute;inset:12px;border:1px solid rgba(201,150,58,.25);
+  display:flex;flex-direction:column;align-items:center;justify-content:space-around;padding:14px 8px;
+}
+.door-orn { font-size:26px;color:rgba(201,150,58,.3);line-height:1; }
+.door-knob {
+  position:absolute;top:50%;width:12px;height:12px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,var(--gold-light),var(--gold-dim));
+  box-shadow:0 2px 6px rgba(0,0,0,.8);transform:translateY(-50%);
+  transition:opacity .5s ease;
+}
+.door-left .door-knob { right:-6px; }
+.door-right .door-knob { left:-6px; }
+.door-light {
+  position:absolute;inset:-24px;z-index:-1;
+  background:radial-gradient(ellipse at 50% 50%,rgba(240,180,60,0) 0%,transparent 80%);
+  transition:background 1s ease .6s;
+}
+.door-glow {
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 50%,rgba(201,150,58,0) 0%,transparent 100%);
+  transition:background 1.4s ease;
+}
+/* Open state */
+.door-wrap.open .door-left { transform:perspective(900px) rotateY(-118deg); }
+.door-wrap.open .door-right { transform:perspective(900px) rotateY(118deg); }
+.door-wrap.open .door-light { background:radial-gradient(ellipse at 50% 50%,rgba(240,200,80,.5) 0%,rgba(200,150,40,.15) 55%,transparent 100%); }
+.door-wrap.open .door-glow { background:radial-gradient(ellipse at 50% 50%,rgba(201,150,58,.22) 0%,transparent 70%); }
+.door-wrap.open .door-knob { opacity:0; }
+
+#enter-btn {
+  display:block;margin:0 auto;padding:14px 44px;
+  background:transparent;border:1px solid var(--gold);
+  color:var(--gold);font-family:'Cormorant Garamond',serif;
+  font-size:14px;letter-spacing:5px;text-transform:uppercase;cursor:none;
+  position:relative;overflow:hidden;transition:color .4s;
+  animation:heroIn 1s .6s both;
+}
+#enter-btn::before { content:'';position:absolute;inset:0;background:var(--gold);transform:translateX(-100%);transition:transform .4s ease; }
+#enter-btn:hover { color:var(--dark); }
+#enter-btn:hover::before { transform:translateX(0); }
+#enter-btn span { position:relative;z-index:1; }
+
+/* FLASH */
+#flash { position:fixed;inset:0;z-index:500;background:rgba(240,200,100,0);pointer-events:none;transition:background .5s ease; }
+#flash.bright { background:rgba(250,230,150,1); }
+
+/* ══ SCREEN 2 — MUSEUM INTERIOR ══ */
+#screen-museum {
+  position:fixed;inset:0;z-index:50;
+  opacity:0;visibility:hidden;
+  transition:opacity .9s ease;
+  overflow:hidden;
+}
+#screen-museum.visible { opacity:1;visibility:visible; }
+
+.museum-bg {
+  position:absolute;inset:0;
+  background:
+    linear-gradient(180deg,rgba(10,5,0,.35) 0%,transparent 25%,transparent 70%,rgba(5,2,0,.7) 100%),
+    radial-gradient(ellipse at 50% 35%,rgba(201,150,58,.07) 0%,transparent 60%),
+    var(--brown);
+}
+.museum-floor {
+  position:absolute;bottom:0;left:0;right:0;height:48%;
+  background:
+    repeating-linear-gradient(90deg,rgba(201,150,58,.06) 0,rgba(201,150,58,.06) 1px,transparent 1px,transparent 80px),
+    repeating-linear-gradient(0deg,rgba(201,150,58,.06) 0,rgba(201,150,58,.06) 1px,transparent 1px,transparent 60px),
+    linear-gradient(180deg,rgba(20,10,3,.1) 0%,rgba(10,5,1,.85) 100%);
+  transform-origin:bottom;transform:perspective(600px) rotateX(42deg);
+}
+.museum-ceiling { position:absolute;top:0;left:0;right:0;height:22%;background:linear-gradient(180deg,rgba(5,2,0,.95) 0%,transparent 100%); }
+.m-wall { position:absolute;top:0;bottom:0;width:10%;background:linear-gradient(90deg,rgba(8,4,1,.92),rgba(18,9,3,.35)); }
+.m-wall.r { right:0;background:linear-gradient(270deg,rgba(8,4,1,.92),rgba(18,9,3,.35)); }
+
+
+
+.museum-nav {
+  position:absolute;top:0;left:0;right:0;z-index:10;padding:16px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:linear-gradient(180deg,rgba(5,2,0,.92) 0%,transparent 100%);
+}
+.museum-logo { font-family:'Playfair Display',serif;font-size:16px;color:var(--gold);letter-spacing:2px; }
+.back-btn {
+  padding:8px 24px;border:1px solid var(--gold-dim);background:transparent;
+  color:var(--gold-dim);font-family:'Cormorant Garamond',serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;cursor:none;transition:all .3s;
+}
+.back-btn:hover { border-color:var(--gold);color:var(--gold); }
+
+/* GALLERY HALL */
+.gallery-hall {
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  padding:80px 100px 70px;
+}
+.focal-display { display:flex;flex-direction:column;align-items:center;width:100%;max-width:1080px;position:relative; }
+
+.piece-nav { position:absolute;top:50%;transform:translateY(-50%);z-index:20; }
+.piece-nav.left { left:-64px; }
+.piece-nav.right { right:-64px; }
+.piece-arrow {
+  width:48px;height:48px;border:1px solid var(--gold-dim);background:rgba(10,5,0,.85);
+  color:var(--gold);font-size:20px;cursor:none;display:flex;align-items:center;justify-content:center;
+  transition:all .3s;
+}
+.piece-arrow:hover:not(:disabled) { border-color:var(--gold);background:rgba(201,150,58,.12); }
+.piece-arrow:disabled { opacity:.2; }
+
+.piece-stage { width:100%;display:flex;gap:52px;align-items:center; }
+
+/* Art frame */
+.art-frame-wrap { flex:0 0 auto;position:relative; }
+.art-frame-wrap.entering { animation:frameIn .75s cubic-bezier(.22,1,.36,1) both; }
+.art-frame-wrap.exiting  { animation:frameOut .35s ease both; }
+@keyframes frameIn  { from{opacity:0;transform:translateX(-38px) scale(.95)} to{opacity:1;transform:none} }
+@keyframes frameOut { from{opacity:1;transform:none} to{opacity:0;transform:translateX(30px)} }
+
+.art-outer-frame {
+  padding:14px;
+  background:linear-gradient(135deg,#2E1C08,#1A1004,#3A2208,#1A1004,#2E1C08);
+  box-shadow:
+    0 0 0 2px rgba(201,150,58,.55),
+    0 0 0 4px rgba(5,2,0,.9),
+    0 0 0 6px rgba(201,150,58,.18),
+    0 28px 80px rgba(0,0,0,.95),
+    inset 0 0 24px rgba(201,150,58,.07);
+  position:relative;
+}
+.art-outer-frame::before { content:'';position:absolute;inset:5px;border:1px solid rgba(201,150,58,.3);pointer-events:none; }
+.art-outer-frame::after  { content:'';position:absolute;inset:2px;border:1px solid rgba(201,150,58,.12);pointer-events:none; }
+.fc { position:absolute;width:26px;height:26px;border-color:var(--gold);border-style:solid;opacity:.65;z-index:2; }
+.fc.tl{top:3px;left:3px;border-width:2px 0 0 2px}
+.fc.tr{top:3px;right:3px;border-width:2px 2px 0 0}
+.fc.bl{bottom:3px;left:3px;border-width:0 0 2px 2px}
+.fc.br{bottom:3px;right:3px;border-width:0 2px 2px 0}
+
+#artCanvas { display:block;width:420px;height:340px; }
+
+/* Spotlight removed — was causing visible vertical line artifact */
+
+/* Info panel */
+.info-panel { flex:1;min-width:0; }
+.info-panel.entering { animation:infoIn .8s .12s cubic-bezier(.22,1,.36,1) both; }
+.info-panel.exiting  { animation:infoOut .3s ease both; }
+@keyframes infoIn  { from{opacity:0;transform:translateX(28px)} to{opacity:1;transform:none} }
+@keyframes infoOut { from{opacity:1} to{opacity:0} }
+
+.piece-era { font-size:10px;letter-spacing:7px;color:var(--gold);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:12px; }
+.piece-era::before { content:'';width:30px;height:1px;background:var(--gold-dim); }
+.piece-title { font-family:'Playfair Display',serif;font-size:clamp(26px,3.2vw,46px);font-weight:900;color:var(--ivory);line-height:1.05;margin-bottom:14px; }
+.piece-title em { font-style:italic;color:var(--gold); }
+.piece-divider { width:56px;height:1px;background:var(--gold-dim);margin-bottom:18px; }
+.piece-body { font-size:16px;line-height:1.88;color:var(--parchment);opacity:.9;margin-bottom:22px;max-width:460px; }
+.piece-tags { display:flex;flex-wrap:wrap;gap:7px;margin-bottom:22px; }
+.piece-tag { padding:4px 13px;border:1px solid var(--gold-dim);font-size:10px;letter-spacing:3px;color:var(--gold-dim);text-transform:uppercase; }
+.piece-quote { font-family:'IM Fell English',serif;font-style:italic;font-size:15px;line-height:1.65;color:var(--parchment);opacity:.68;padding-left:18px;border-left:2px solid var(--gold-dim);max-width:420px; }
+
+/* Footer dots — anchored to museum screen bottom, never overlaps content */
+.piece-footer {
+  position:absolute;
+  bottom:20px;
+  left:0; right:0;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  z-index:20;pointer-events:none;
+}
+.piece-dots { display:flex;gap:10px;pointer-events:all; }
+.pdot { width:6px;height:6px;border-radius:50%;background:var(--gold-dim);cursor:none;transition:all .3s; }
+.pdot.active { background:var(--gold);box-shadow:0 0 6px rgba(201,150,58,.6); }
+.piece-counter { font-size:9px;letter-spacing:4px;color:var(--gold-dim);text-transform:uppercase;opacity:.7; }
+
+
+/* Ambient */
+.amb { position:absolute;border-radius:50%;pointer-events:none;filter:blur(90px);opacity:.1; }
+
+#pc { position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.4; }
+</style>
+</head>
+<body>
+
+<canvas id="pc"></canvas>
+<div id="cur">
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- sleek arrow pointer -->
+    <path d="M4 2 L4 18 L8.5 13.5 L12 20 L14 19 L10.5 12.5 L17 12.5 Z"
+      fill="#C9963A" stroke="#1E1005" stroke-width="0.8" stroke-linejoin="round"/>
+  </svg>
+</div>
+<div id="flash"></div>
+
+<!-- ══ SCREEN 1 — ENTRANCE ══ -->
+<div id="screen-entrance">
+  <div class="dust" id="dustL"></div>
+
+  <div class="entrance-hero">
+    <div class="e-eyebrow">Provincia de Bulacan &nbsp;·&nbsp; Est. 1578</div>
+    <h1 class="e-title">Museo ng<em>Bulacan</em></h1>
+    <p class="e-sub">Ang Kasaysayan ay buhay pa rin</p>
+    <div class="e-divider"></div>
+
+    <div class="door-wrap" id="doorWrap">
+      <div class="door-light"></div>
+      <div class="door-frame"></div>
+      <div class="door-left">
+        <div class="door-panel">
+          <div class="door-orn">✦</div><div class="door-orn" style="font-size:13px;opacity:.45">⊕</div><div class="door-orn">✦</div>
+        </div>
+        <div class="door-knob"></div>
+      </div>
+      <div class="door-right">
+        <div class="door-panel">
+          <div class="door-orn">✦</div><div class="door-orn" style="font-size:13px;opacity:.45">⊕</div><div class="door-orn">✦</div>
+        </div>
+        <div class="door-knob"></div>
+      </div>
+      <div class="door-glow"></div>
+    </div>
+
+    <button id="enter-btn" onclick="enterMuseum()"><span>Enter the Museum</span></button>
+  </div>
+</div>
+
+<!-- ══ SCREEN 2 — MUSEUM ══ -->
+<div id="screen-museum">
+  <div class="museum-bg"></div>
+  <div class="museum-floor"></div>
+  <div class="museum-ceiling"></div>
+
+
+
+  <div class="amb" style="width:380px;height:380px;background:#C9963A;top:5%;left:3%;"></div>
+  <div class="amb" style="width:460px;height:460px;background:#7A1B1B;bottom:2%;right:5%;"></div>
+
+  <div class="museum-nav">
+    <div class="museum-logo">Museo ng Bulacan</div>
+    <button class="back-btn" onclick="goBack()">← Exit Museum</button>
+  </div>
+
+  <div class="gallery-hall">
+    <div class="focal-display">
+
+      <div class="piece-nav left"><button class="piece-arrow" id="btnPrev" onclick="navigate(-1)">←</button></div>
+      <div class="piece-nav right"><button class="piece-arrow" id="btnNext" onclick="navigate(1)">→</button></div>
+
+      <div class="piece-stage">
+        <div class="art-frame-wrap" id="artFrame">
+          <div class="art-outer-frame">
+            <div class="fc tl"></div><div class="fc tr"></div><div class="fc bl"></div><div class="fc br"></div>
+            <canvas id="artCanvas" width="420" height="340"></canvas>
+          </div>
+        </div>
+
+        <div class="info-panel" id="infoPanel">
+          <div class="piece-era" id="pEra"></div>
+          <h2 class="piece-title" id="pTitle"></h2>
+          <div class="piece-divider"></div>
+          <p class="piece-body" id="pBody"></p>
+          <div class="piece-tags" id="pTags"></div>
+          <blockquote class="piece-quote" id="pQuote"></blockquote>
+        </div>
+      </div><!-- /piece-stage -->
+
+    </div><!-- /focal-display -->
+  </div><!-- /gallery-hall -->
+
+  <!-- Dots anchored to very bottom of museum screen, completely separate from content -->
+  <div class="piece-footer">
+    <div class="piece-dots" id="pieceDots"></div>
+    <div class="piece-counter" id="pieceCounter"></div>
+  </div>
+
+</div>
+
+<script>
+/* ── CURSOR ── */
+const cur=document.getElementById('cur');
+document.addEventListener('mousemove',e=>{cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';});
+document.querySelectorAll('button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>cur.classList.add('h'));
+  el.addEventListener('mouseleave',()=>cur.classList.remove('h'));
+});
+
+/* ── DUST ── */
+const dustL=document.getElementById('dustL');
+for(let i=0;i<40;i++){
+  const s=document.createElement('span');
+  s.style.cssText=`left:${Math.random()*100}%;bottom:-5px;animation-duration:${7+Math.random()*10}s;animation-delay:${Math.random()*12}s;--dx:${(Math.random()-.5)*220}px;`;
+  dustL.appendChild(s);
+}
+
+/* ── PARTICLES ── */
+const pc=document.getElementById('pc'),pctx=pc.getContext('2d');
+let pts=[];
+function rszP(){pc.width=innerWidth;pc.height=innerHeight;}rszP();addEventListener('resize',rszP);
+for(let i=0;i<55;i++) pts.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.2+.2,vx:(Math.random()-.5)*.22,vy:-(Math.random()*.38+.08),o:Math.random()*.5+.1,life:Math.random()*300});
+(function ap(){pctx.clearRect(0,0,pc.width,pc.height);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.life++;if(p.y<-5||p.life>360){p.y=innerHeight+5;p.x=Math.random()*innerWidth;p.life=0;}pctx.beginPath();pctx.arc(p.x,p.y,p.r,0,Math.PI*2);pctx.fillStyle=`rgba(201,150,58,${p.o*Math.sin(p.life/360*Math.PI)})`;pctx.fill();});requestAnimationFrame(ap);})();
+
+/* ══════════════════════════
+   HISTORY PIECES
+══════════════════════════ */
+const pieces=[
+  {
+    era:'Pre-Colonial Era · Before 1565',
+    title:'The Ancient <em>Barangay Kingdoms</em>',
+    body:'Long before Spanish galleons appeared on the horizon, Bulacan thrived as a constellation of prosperous barangay settlements along the Angat and Marilao rivers. Tagalog datus governed communities steeped in oral tradition, animist faith, and vibrant trade. Gold jewelry, beeswax, and forest goods flowed through river networks stretching across the archipelago.',
+    tags:['Tagalog Culture','River Trade','Datu Governance','Pre-Hispanic'],
+    quote:'"We were a people of the river — life flowed from the Angat as naturally as breath."',
+    mood:'forest'
+  },
+  {
+    era:'Spanish Colonial Period · 1578',
+    title:'The <em>Province</em> is Born',
+    body:'In 1578, Spain formally established the Province of Bulacan, with Augustinian friars spreading missions across the territory. Within decades, magnificent stone churches rose from the earth at Malolos, Barasoain, Bulacan town, and Obando. These baroque monuments fused European ecclesiastical architecture with indigenous craftsmanship, creating a uniquely Filipino sacred art.',
+    tags:['Spanish Colonization','Baroque Churches','Augustine Missions','1578'],
+    quote:'"Stone by stone, faith was carved into the earth of Bulacan."',
+    mood:'colonial'
+  },
+  {
+    era:'Literature · 1838',
+    title:'Florante <em>at Laura</em>',
+    body:'Francisco "Balagtas" Baltazar, born in Bigaa (now Baliwag) in 1788, wrote his masterpiece while imprisoned. Florante at Laura appears on its surface to be a tale of Albanian knights and captive maidens, but beneath lies a scorching indictment of Spanish colonial injustice. It remains the crown jewel of Philippine classical literature.',
+    tags:['Francisco Balagtas','Awit Poem','1838','Philippine Literature'],
+    quote:'"Ang laki\'y sa layaw, karaniwa\'y hubad sa bait at muni at sa hatol madahop." — Balagtas',
+    mood:'literature'
+  },
+  {
+    era:'Philippine Revolution · 1896',
+    title:'The <em>Cry</em> of Pugad Lawin',
+    body:'On August 23, 1896, Andres Bonifacio led the Katipunan in a defining act of defiance: tearing their cedulas and crying out for Philippine independence. Bulacan erupted into revolutionary fire. Bulakeños by the thousands took up bolos and bamboo spears against Spanish rifles, driven by a fury centuries in the making.',
+    tags:['Andres Bonifacio','Katipunan','Revolution 1896','Independence'],
+    quote:'"Resistance is not rebellion — it is the highest expression of dignity."',
+    mood:'revolution'
+  },
+  {
+    era:'First Philippine Republic · 1898',
+    title:'The <em>Malolos</em> Congress',
+    body:'On September 15, 1898, inside the hallowed nave of Barasoain Church in Malolos, the Malolos Congress convened. Delegates ratified the Malolos Constitution, establishing the First Philippine Republic — the first constitutional democracy in Asia. Emilio Aguinaldo was inaugurated as its first President. For one luminous year, the Philippines was free.',
+    tags:['Malolos Constitution','First Republic','Barasoain Church','Aguinaldo'],
+    quote:'"Malolos gave Asia its first democracy — a flame colonialism could extinguish but never erase."',
+    mood:'republic'
+  },
+  {
+    era:'Journalism & Reform · 1850–1896',
+    title:'Marcelo H. <em>del Pilar</em>',
+    body:'Born in Bulakan in 1850, Marcelo Hilario del Pilar — known by his pen name Plaridel — wielded the pen like a revolutionary sword. From exile in Barcelona he edited La Solidaridad, the voice of the Propaganda Movement, relentlessly attacking colonial abuses and demanding Filipino rights. He died in poverty in Spain, never seeing the independence his words helped ignite.',
+    tags:['Propaganda Movement','La Solidaridad','Plaridel','Press Freedom'],
+    quote:'"Resistance is the right of every people — ink is as powerful as any blade."',
+    mood:'journalism'
+  },
+  {
+    era:'Living Tradition · Every May',
+    title:'Obando <em>Fertility Rites</em>',
+    body:'Every May, for three consecutive days, the streets of Obando become a river of swaying devotion. Thousands dance in procession before Santa Clara for fertility, San Pascual Baylon for marriage blessings, and the Virgin of Salambao who guides fishermen home. This ritual, centuries old and recognized by UNESCO, is Bulacan\'s most intimate and extraordinary tradition.',
+    tags:['Obando Festival','UNESCO Heritage','Santa Clara','Folk Catholicism'],
+    quote:'"They do not dance to be seen. They dance to be heard by heaven."',
+    mood:'festival'
+  },
+  {
+    era:'World War II · 1942–1945',
+    title:'The <em>Resistance</em> of Bulacan',
+    body:'When Japanese forces swept across Luzon in 1942, Bulacan refused to be silenced. Guerrilla units — farmers by day, fighters by night — harassed supply lines, sheltered Allied soldiers, and kept the flame of resistance burning through three brutal years of occupation. Liberation came in 1945 amid fierce fighting along the roads to Manila.',
+    tags:['WWII Philippines','Japanese Occupation','Guerrilla Resistance','Liberation 1945'],
+    quote:'"Bulacan bent — in fire, in hunger, in grief — but it did not break."',
+    mood:'wartime'
+  }
+];
+
+/* ══ CANVAS PAINTERS ══ */
+function rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+
+function paint(idx){
+  const c=document.getElementById('artCanvas'),ctx=c.getContext('2d'),W=c.width,H=c.height;
+  const mood=pieces[idx].mood;
+  ctx.clearRect(0,0,W,H);
+
+  const skies={
+    forest:['#0A1A0D','#132A16'],colonial:['#120D1A','#1A1028'],literature:['#1A0905','#280C08'],
+    revolution:['#1A0505','#280808'],republic:['#0A0E1A','#101628'],journalism:['#0D1A12','#122A1A'],
+    festival:['#1A0D1A','#280F28'],wartime:['#0A0A0A','#141412']
+  };
+  const grounds={
+    forest:'#0A1005',colonial:'#0D0A14',literature:'#120503',revolution:'#100303',
+    republic:'#060810',journalism:'#08100C',festival:'#100810',wartime:'#060604'
+  };
+  const sky=ctx.createLinearGradient(0,0,0,H*.7);
+  sky.addColorStop(0,skies[mood][0]);sky.addColorStop(1,skies[mood][1]);
+  ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle=grounds[mood];ctx.fillRect(0,H*.62,W,H*.38);
+
+  if(mood==='forest'){
+    const rv=ctx.createLinearGradient(0,H*.6,0,H);rv.addColorStop(0,'rgba(18,55,75,0.8)');rv.addColorStop(1,'rgba(8,28,48,0.9)');ctx.fillStyle=rv;ctx.beginPath();ctx.moveTo(W*.05,H*.62);ctx.bezierCurveTo(W*.3,H*.68,W*.7,H*.65,W*.95,H*.72);ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='rgba(80,160,200,0.2)';ctx.lineWidth=1;for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(W*.1+i*W*.2,H*.66+i*3);ctx.quadraticCurveTo(W*.3+i*W*.1,H*.7,W*.5+i*W*.1,H*.68+i*3);ctx.stroke();}
+    for(let i=0;i<10;i++){const tx=W*.03+i*W*.1,th=55+Math.random()*45;ctx.fillStyle=`rgba(${8+i*3},${32+i*8},${10+i*3},0.9)`;ctx.beginPath();ctx.moveTo(tx,H*.6-th);ctx.lineTo(tx-15,H*.62);ctx.lineTo(tx+15,H*.62);ctx.closePath();ctx.fill();ctx.fillStyle='rgba(35,20,6,0.8)';ctx.fillRect(tx-3,H*.62,6,16);}
+    for(let i=0;i<3;i++){const hx=W*.18+i*W*.26,hy=H*.5;ctx.fillStyle='rgba(90,55,18,0.7)';ctx.fillRect(hx,hy,34,24);ctx.fillStyle='rgba(55,30,8,0.85)';ctx.beginPath();ctx.moveTo(hx-5,hy);ctx.lineTo(hx+17,hy-18);ctx.lineTo(hx+39,hy);ctx.closePath();ctx.fill();}
+  }
+  else if(mood==='colonial'){
+    const W2=W*.56,cx=(W-W2)/2;ctx.fillStyle='rgba(208,188,148,0.82)';ctx.fillRect(cx,H*.12,W2,H*.54);
+    ctx.fillStyle='rgba(188,168,128,0.88)';ctx.fillRect(cx-9,H*.05,W2*.24,H*.64);ctx.fillRect(cx+W2-W2*.24+9,H*.05,W2*.24,H*.64);
+    [[cx-9,W2*.12],[cx+W2-W2*.12+9,W2*.12]].forEach(([tx,hw])=>{ctx.fillStyle='rgba(140,105,45,0.8)';ctx.beginPath();ctx.moveTo(tx,H*.05);ctx.lineTo(tx+hw,H*-.04);ctx.lineTo(tx+hw*2,H*.05);ctx.closePath();ctx.fill();});
+    ctx.fillStyle='rgba(55,30,10,0.82)';ctx.beginPath();ctx.arc(W/2,H*.5,W2*.13,Math.PI,0);ctx.lineTo(W/2+W2*.13,H*.67);ctx.lineTo(W/2-W2*.13,H*.67);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.arc(W/2,H*.27,22,0,Math.PI*2);ctx.strokeStyle='rgba(201,150,58,0.55)';ctx.lineWidth=2;ctx.stroke();
+    for(let i=0;i<8;i++){const a=i*Math.PI/4;ctx.beginPath();ctx.moveTo(W/2,H*.27);ctx.lineTo(W/2+Math.cos(a)*22,H*.27+Math.sin(a)*22);ctx.strokeStyle='rgba(201,150,58,0.22)';ctx.lineWidth=1;ctx.stroke();}
+    const gl=ctx.createRadialGradient(W/2,H*.3,0,W/2,H*.3,W*.38);gl.addColorStop(0,'rgba(201,150,58,0.12)');gl.addColorStop(1,'transparent');ctx.fillStyle=gl;ctx.fillRect(0,0,W,H);
+  }
+  else if(mood==='literature'){
+    ctx.fillStyle='rgba(218,198,158,0.9)';rr(ctx,W*.07,H*.17,W*.86,H*.58,6);ctx.fill();
+    ctx.strokeStyle='rgba(95,55,15,0.3)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(W/2,H*.19);ctx.lineTo(W/2,H*.73);ctx.stroke();
+    ctx.fillStyle='rgba(55,25,8,0.42)';for(let i=0;i<9;i++){ctx.fillRect(W*.11,H*.25+i*H*.054,W*.35,1.5);ctx.fillRect(W*.54,H*.25+i*H*.054,W*.35,1.5);}
+    ctx.fillStyle='rgba(175,28,28,0.72)';ctx.font=`bold ${W*.082}px "Playfair Display",serif`;ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText('F',W*.12,H*.23);
+    ctx.save();ctx.translate(W*.74,H*.14);ctx.rotate(-Math.PI/5);ctx.fillStyle='rgba(238,218,158,0.92)';ctx.beginPath();ctx.moveTo(0,-55);ctx.bezierCurveTo(14,-28,12,2,0,62);ctx.bezierCurveTo(-12,2,-14,-28,0,-55);ctx.closePath();ctx.fill();ctx.strokeStyle='rgba(75,45,12,0.55)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,-55);ctx.lineTo(0,62);ctx.stroke();ctx.restore();
+    ctx.beginPath();ctx.arc(W*.71,H*.59,4,0,Math.PI*2);ctx.fillStyle='rgba(18,8,3,0.82)';ctx.fill();
+    ctx.strokeStyle='rgba(201,150,58,0.32)';ctx.lineWidth=1.5;rr(ctx,W*.07,H*.17,W*.86,H*.58,6);ctx.stroke();
+  }
+  else if(mood==='revolution'){
+    for(let i=0;i<5;i++){const sg=ctx.createRadialGradient(W*(0.1+i*.2),H*.3,0,W*(0.1+i*.2),H*.3,55+i*18);sg.addColorStop(0,'rgba(28,12,8,0.6)');sg.addColorStop(1,'transparent');ctx.fillStyle=sg;ctx.fillRect(0,0,W,H);}
+    [[W*.1,22],[W*.22,32],[W*.36,20],[W*.5,38],[W*.63,18],[W*.76,28],[W*.88,16]].forEach(([fx,fh],i)=>{const bh=H*.38-fh;ctx.fillStyle='rgba(12,4,1,0.96)';ctx.fillRect(fx-6,H*.58-bh,12,bh);ctx.beginPath();ctx.arc(fx,H*.58-bh-10,9,0,Math.PI*2);ctx.fill();ctx.strokeStyle='rgba(12,4,1,0.96)';ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(fx+5,H*.58-bh+bh*.3);ctx.lineTo(fx+22,H*.58-bh+bh*.3-(i%2===0?28:14));ctx.stroke();if(i%2===0){ctx.beginPath();ctx.moveTo(fx+22,H*.58-bh+bh*.3-26);ctx.lineTo(fx+22,H*.58-bh+bh*.3-42);ctx.strokeStyle='rgba(201,150,58,0.65)';ctx.lineWidth=2;ctx.stroke();}});
+    const fg=ctx.createRadialGradient(W*.5,H*.6,0,W*.5,H*.6,W*.42);fg.addColorStop(0,'rgba(195,75,18,0.28)');fg.addColorStop(.55,'rgba(195,45,8,0.08)');fg.addColorStop(1,'transparent');ctx.fillStyle=fg;ctx.fillRect(0,0,W,H);
+    for(let i=0;i<8;i++){const fx=W*.04+i*W*.13;ctx.fillStyle=`rgba(${195+Math.random()*40},${55+Math.random()*40},10,${0.48+Math.random()*.3})`;ctx.beginPath();ctx.moveTo(fx,H*.76);ctx.quadraticCurveTo(fx-10,H*.55,fx,H*.48);ctx.quadraticCurveTo(fx+10,H*.55,fx+6,H*.76);ctx.closePath();ctx.fill();}
+  }
+  else if(mood==='republic'){
+    ctx.fillStyle='rgba(198,178,138,0.78)';ctx.fillRect(W*.2,H*.08,W*.6,H*.5);
+    ctx.fillStyle='rgba(38,18,6,0.82)';ctx.beginPath();ctx.arc(W/2,H*.42,W*.1,Math.PI,0);ctx.lineTo(W/2+W*.1,H*.6);ctx.lineTo(W/2-W*.1,H*.6);ctx.closePath();ctx.fill();
+    [[W*.28,H*.22],[W*.5,H*.18],[W*.72,H*.22]].forEach(([wx,wy])=>{ctx.beginPath();ctx.arc(wx,wy,14,Math.PI,0);ctx.fillStyle='rgba(201,150,58,0.42)';ctx.fill();ctx.strokeStyle='rgba(201,150,58,0.28)';ctx.lineWidth=1;ctx.stroke();});
+    for(let i=0;i<22;i++){const px=W*.07+i*(W*.88/22);ctx.fillStyle='rgba(48,28,8,0.72)';ctx.fillRect(px-4,H*.68,8,22);ctx.beginPath();ctx.arc(px,H*.66,6,0,Math.PI*2);ctx.fillStyle='rgba(198,158,98,0.72)';ctx.fill();}
+    ctx.fillStyle='rgba(28,28,118,0.72)';ctx.fillRect(W*.82,H*.12,W*.1,H*.08);ctx.fillStyle='rgba(175,18,18,0.72)';ctx.fillRect(W*.82,H*.2,W*.1,H*.08);
+    ctx.beginPath();ctx.arc(W*.84,H*.2,8,0,Math.PI*2);ctx.fillStyle='rgba(255,218,48,0.82)';ctx.fill();
+    const gl=ctx.createRadialGradient(W/2,H*.3,0,W/2,H*.3,W*.42);gl.addColorStop(0,'rgba(201,150,58,0.14)');gl.addColorStop(1,'transparent');ctx.fillStyle=gl;ctx.fillRect(0,0,W,H);
+  }
+  else if(mood==='journalism'){
+    ctx.fillStyle='rgba(218,208,183,0.92)';rr(ctx,W*.06,H*.1,W*.88,H*.65,4);ctx.fill();ctx.strokeStyle='rgba(75,45,8,0.28)';ctx.lineWidth=1;rr(ctx,W*.06,H*.1,W*.88,H*.65,4);ctx.stroke();
+    ctx.fillStyle='rgba(18,8,3,0.88)';ctx.font=`bold ${W*.062}px "Playfair Display",serif`;ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText('La Solidaridad',W/2,H*.13);
+    ctx.fillStyle='rgba(75,45,8,0.48)';ctx.fillRect(W*.1,H*.22,W*.8,1.5);
+    for(let col=0;col<3;col++) for(let ln=0;ln<8;ln++){ctx.fillStyle='rgba(38,18,4,0.48)';ctx.fillRect(W*.1+col*W*.28,H*.26+ln*H*.053,W*.24-(col===2?6:0),1.8);}
+    ctx.fillStyle='rgba(18,8,3,0.68)';ctx.font=`italic ${W*.048}px "Playfair Display",serif`;ctx.textAlign='center';ctx.fillText('"Libertad!"',W/2,H*.44);
+    ctx.save();ctx.translate(W*.77,H*.62);ctx.rotate(-Math.PI/6);ctx.fillStyle='rgba(55,35,8,0.58)';ctx.fillRect(-2,-30,4,52);ctx.restore();
+    const cl=ctx.createRadialGradient(W*.84,H*.24,0,W*.84,H*.24,82);cl.addColorStop(0,'rgba(255,178,48,0.18)');cl.addColorStop(1,'transparent');ctx.fillStyle=cl;ctx.fillRect(0,0,W,H);
+  }
+  else if(mood==='festival'){
+    const dC=['#E85580','#50C878','#E8A020','#5080E8','#E050D8','#F0A830'],t=Date.now()/1000;
+    for(let i=0;i<7;i++){const dx=W*.06+i*W*.13,sw=Math.sin(t*1.3+i*.9)*18,bo=Math.abs(Math.sin(t*1.5+i))*12;ctx.save();ctx.translate(dx+sw*.4,0);ctx.fillStyle=dC[i%6];ctx.beginPath();ctx.moveTo(0,H*.47-bo);ctx.lineTo(-22,H*.72-bo);ctx.lineTo(22,H*.72-bo);ctx.closePath();ctx.fill();ctx.fillStyle='rgba(220,175,128,0.88)';ctx.fillRect(-6,H*.33-bo,12,H*.16);ctx.beginPath();ctx.arc(0,H*.29-bo,11,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(38,18,4,0.92)';ctx.beginPath();ctx.arc(0,H*.27-bo,8,-Math.PI*.1,Math.PI*1.1,true);ctx.fill();ctx.strokeStyle=dC[i%6];ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-6,H*.38-bo);ctx.lineTo(-22,H*.27-bo+sw*.4);ctx.stroke();ctx.beginPath();ctx.moveTo(6,H*.38-bo);ctx.lineTo(22,H*.27-bo-sw*.4);ctx.stroke();ctx.beginPath();ctx.arc(-22,H*.27-bo+sw*.4,4,0,Math.PI*2);ctx.fillStyle='rgba(255,218,78,0.92)';ctx.fill();ctx.restore();}
+    for(let i=0;i<18;i++){ctx.beginPath();ctx.arc(Math.random()*W,Math.random()*H*.82,2,0,Math.PI*2);ctx.fillStyle=dC[i%6]+'AA';ctx.fill();}
+    ctx.fillStyle='rgba(8,4,1,0.62)';ctx.beginPath();ctx.arc(W/2,H*.05,48,0,Math.PI);ctx.lineTo(W/2+48,H*.3);ctx.lineTo(W/2-48,H*.3);ctx.closePath();ctx.fill();
+  }
+  else if(mood==='wartime'){
+    for(let i=0;i<6;i++){const sg=ctx.createRadialGradient(W*(0.1+i*.18),H*(.1+i*.04),0,W*(0.1+i*.18),H*(.1+i*.04),48+i*14);sg.addColorStop(0,'rgba(22,18,8,0.52)');sg.addColorStop(1,'transparent');ctx.fillStyle=sg;ctx.fillRect(0,0,W,H);}
+    for(let i=0;i<5;i++){const bx=W*.04+i*W*.2,bw=W*.12,bh=H*.18+Math.random()*H*.22;ctx.fillStyle=`rgba(${18+i*5},${13+i*3},${6+i*2},0.82)`;ctx.fillRect(bx,H*.55-bh,bw,bh);ctx.fillStyle='rgba(8,6,2,0.92)';ctx.beginPath();ctx.moveTo(bx,H*.55-bh);for(let j=0;j<=bw;j+=8)ctx.lineTo(bx+j,H*.55-bh-(Math.random()*18));ctx.lineTo(bx+bw,H*.55-bh);ctx.closePath();ctx.fill();}
+    ctx.beginPath();ctx.arc(W*.8,H*.15,24,0,Math.PI*2);ctx.fillStyle='rgba(175,155,95,0.22)';ctx.fill();
+    const ff=ctx.createRadialGradient(W*.34,H*.52,0,W*.34,H*.52,78);ff.addColorStop(0,'rgba(198,75,8,0.42)');ff.addColorStop(1,'transparent');ctx.fillStyle=ff;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(4,2,0,0.96)';ctx.fillRect(W*.5-5,H*.35,10,H*.25);ctx.beginPath();ctx.arc(W*.5,H*.33,10,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(28,28,115,0.52)';ctx.fillRect(W*.5+5,H*.3,30,16);ctx.fillStyle='rgba(175,18,18,0.52)';ctx.fillRect(W*.5+5,H*.3+16,30,16);
+    for(let i=0;i<28;i++){ctx.beginPath();ctx.arc(Math.random()*W,Math.random()*H*.45,Math.random()*1.1+.25,0,Math.PI*2);ctx.fillStyle=`rgba(195,175,135,${0.18+Math.random()*.38})`;ctx.fill();}
+  }
+
+  // Vignette
+  const vig=ctx.createRadialGradient(W/2,H/2,W*.18,W/2,H/2,W*.78);vig.addColorStop(0,'transparent');vig.addColorStop(1,'rgba(4,1,0,0.62)');ctx.fillStyle=vig;ctx.fillRect(0,0,W,H);
+}
+
+/* ══ PIECE LOGIC ══ */
+let cur_p=0,animating=false;
+
+function buildDots(){
+  const el=document.getElementById('pieceDots');el.innerHTML='';
+  pieces.forEach((_,i)=>{const d=document.createElement('div');d.className='pdot'+(i===0?' active':'');d.addEventListener('click',()=>{if(i!==cur_p)navigate(i-cur_p);});el.appendChild(d);});
+}
+function updateInfo(idx){
+  const p=pieces[idx];
+  document.getElementById('pEra').textContent=p.era;
+  document.getElementById('pTitle').innerHTML=p.title;
+  document.getElementById('pBody').textContent=p.body;
+  document.getElementById('pQuote').textContent=p.quote;
+  const tags=document.getElementById('pTags');tags.innerHTML='';
+  p.tags.forEach(t=>{const s=document.createElement('span');s.className='piece-tag';s.textContent=t;tags.appendChild(s);});
+  document.getElementById('pieceCounter').textContent=`${idx+1} / ${pieces.length}`;
+  document.querySelectorAll('.pdot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  document.getElementById('btnPrev').disabled=idx===0;
+  document.getElementById('btnNext').disabled=idx===pieces.length-1;
+}
+function navigate(dir){
+  if(animating)return;
+  const next=cur_p+dir;
+  if(next<0||next>=pieces.length)return;
+  animating=true;
+  const fr=document.getElementById('artFrame'),ip=document.getElementById('infoPanel');
+  fr.classList.add('exiting');fr.classList.remove('entering');ip.classList.add('exiting');ip.classList.remove('entering');
+  setTimeout(()=>{
+    cur_p=next;updateInfo(cur_p);paint(cur_p);
+    fr.classList.remove('exiting');fr.classList.add('entering');ip.classList.remove('exiting');ip.classList.add('entering');
+    setTimeout(()=>{fr.classList.remove('entering');ip.classList.remove('entering');animating=false;},780);
+  },360);
+}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')navigate(-1);if(e.key==='ArrowRight')navigate(1);});
+
+/* ══ DOOR + ENTER ══ */
+function enterMuseum(){
+  const door=document.getElementById('doorWrap'),flash=document.getElementById('flash'),entrance=document.getElementById('screen-entrance'),museum=document.getElementById('screen-museum');
+  door.classList.add('open');
+  setTimeout(()=>flash.classList.add('bright'),1300);
+  setTimeout(()=>{
+    entrance.classList.add('gone');museum.classList.add('visible');
+    buildDots();updateInfo(0);paint(0);startLoop();
+    setTimeout(()=>flash.classList.remove('bright'),120);
+  },1750);
+}
+function goBack(){
+  const entrance=document.getElementById('screen-entrance'),museum=document.getElementById('screen-museum'),door=document.getElementById('doorWrap'),flash=document.getElementById('flash');
+  flash.classList.add('bright');
+  setTimeout(()=>{museum.classList.remove('visible');entrance.classList.remove('gone');door.classList.remove('open');flash.classList.remove('bright');cur_p=0;},620);
+}
+
+/* Festival animation loop */
+let raf=null;
+function startLoop(){function loop(){if(pieces[cur_p].mood==='festival')paint(cur_p);raf=requestAnimationFrame(loop);}if(raf)cancelAnimationFrame(raf);loop();}
+</script>
+</body>
+</html>
